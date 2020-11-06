@@ -1,0 +1,7 @@
+{
+  getAlertSubscription(userId: "admin") {
+    userId
+    alertTypes
+    emails
+  }
+}

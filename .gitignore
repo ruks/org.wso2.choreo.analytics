@@ -1,0 +1,45 @@
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# exclude jar for gradle wrapper
+!gradle/wrapper/*.jar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# build files
+**/target
+target
+.gradle
+build
+src/gen
+**/.DS_Store
+**/.iml
+.idea/
+.swagger-codegen-ignore
+.swagger-codegen/
+.travis.yml
+build.gradle
+build.sbt
+dependency-reduced-pom.xml
+docs/
+git_push.sh
+gradle.properties
+gradle/
+gradlew
+gradlew.bat
+settings.gradle
+org.wso2.choreo.analytics.query.restapi/src/gen/
+org.wso2.choreo.analytics.api/org.wso2.choreo.analytics.api.iml
+org.wso2.choreo.analytics.query.restapi/org.wso2.choreo.analytics.query.restapi.iml
+org.wso2.choreo.analytics.iml
+org.wso2.choreo.analytics.webapp/org.wso2.choreo.analytics.webapp.iml
+org.wso2.choreo.analytics.ui/src/main/resources/portal/build
+org.wso2.choreo.analytics.ui/org.wso2.choreo.analytics.ui.iml

@@ -1,0 +1,8 @@
+mutation {
+    addAPIAlertConfig(alertConfig: {apiName: "pizza1", apiVersion: "1.0.0", thresholdResponseTime: 2, thresholdBackendTime: 2}) {
+        apiName
+        apiVersion
+        thresholdResponseTime
+        thresholdBackendTime
+    }
+}

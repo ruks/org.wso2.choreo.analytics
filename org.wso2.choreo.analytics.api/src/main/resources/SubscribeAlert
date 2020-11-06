@@ -1,0 +1,7 @@
+mutation {
+  SubscribeAlert(config: {userId: "admin", alertTypes: "backendLatency", emails: "rukshan@wso2.com"}) {
+    userId
+    alertTypes
+    emails
+  }
+}

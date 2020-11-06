@@ -1,0 +1,9 @@
+mutation {
+  addAppAlertConfig(alertConfig: {apiName: "123", apiVersion: "234", appName: "admin", appOwner: "admin", thresholdRequestCount: 10}) {
+    apiName
+    apiVersion
+    appName
+    appOwner
+    thresholdRequestCount
+  }
+}

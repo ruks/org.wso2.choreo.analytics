@@ -1,0 +1,17 @@
+analytics:
+  datasource:
+    username: admin
+    password: pass
+    driver: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://localhost;database=alert
+  kusto:
+    clientid: clientid
+    pass: pass
+    auth: auth
+    url: url
+    database: apim
+  security:
+    trustStore: /Users/rukshan/wso2/apim/coreo/wso2is-5.10.0/repository/resources/security/client-truststore.jks
+    trustStorePass: wso2carbon
+    jwks: https://localhost:9443/oauth2/jwks
+    jwksIssuer: https://localhost:9443/oauth2/token

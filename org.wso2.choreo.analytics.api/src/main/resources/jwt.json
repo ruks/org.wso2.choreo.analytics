@@ -1,0 +1,20 @@
+{
+  "sub": "fazlan",
+  "aut": "APPLICATION_USER",
+  "iss": "https://localhost:9443/oauth2/token",
+  "aud": "XMouT9fN7fdht9mcxrgXLWTY8H8a",
+  "nbf": 1603451963,
+  "azp": "XMouT9fN7fdht9mcxrgXLWTY8H8a",
+  "scope": "openid",
+  "exp": 1603455563,
+  "iat": 1603451963,
+  "jti": "be0457e6-5af8-4ec8-a8f6-bce66ac290a3",
+  "email": "fazlan.pera@gmail.com",
+  "tenant": "foo.com",
+  "customer": "micron.com",
+  "deployment": [
+    "dev",
+    "staging",
+    "prod"
+  ]
+}
