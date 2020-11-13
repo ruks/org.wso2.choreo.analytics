@@ -14,8 +14,8 @@ import javax.annotation.PostConstruct;
 
 @SpringBootApplication
 @EnableOpenApi
-@ComponentScan(basePackages = { "org.wso2.apimgt.choreo.rest.api.analytics.handler",
-        "org.wso2.apimgt.choreo.rest.api" + ".analytics.v1", "org.wso2.apimgt.choreo" })
+@ComponentScan(basePackages = { "org.wso2.apimgt.choreo.rest.api.analytics.impl",
+        "org.wso2.apimgt.choreo.rest.api.analytics.v1", "org.wso2.apimgt.choreo" })
 public class Application extends SpringBootServletInitializer {
     @Autowired
     private Configuration configuration;
@@ -23,8 +23,12 @@ public class Application extends SpringBootServletInitializer {
     @PostConstruct
     void postConstruct() {
         ConfigHolder.getInstance().setConfiguration(configuration);
-        System.setProperty("javax.net.ssl.trustStore", configuration.getSecurity().getTrustStore());
-        System.setProperty("javax.net.ssl.trustStorePassword", configuration.getSecurity().getTrustStorePass());
+        if (configuration.getSecurity().getTrustStore() != null
+                && configuration.getSecurity().getTrustStorePass() != null) {
+            System.setProperty("javax.net.ssl.trustStore", configuration.getSecurity().getTrustStore());
+            System.setProperty("javax.net.ssl.trustStorePassword", configuration.getSecurity().getTrustStorePass());
+        }
+
     }
 
     public static void main(String[] args) throws Exception {

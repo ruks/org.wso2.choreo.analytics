@@ -67,6 +67,8 @@ components:
       properties:
         query:
           type: string
+        variables:
+          type: object
   securitySchemes:
     bearerAuth:
       type: http

@@ -7,14 +7,31 @@ type Query {
     apiErrorSummary(from: Int, to: Int, limit: Int, orderBy: String, asc: Boolean): ApiErrorSummary
     apiLatencySummary(from: String, to: String, limit: Int, orderBy: String, asc: Boolean, apiName: String, apiVersion: String, apiResourceTemplate: String, apiMethod: String): [ApiLatencySummary]
 
-    listAllAPI(provider: String): String
+#util
+    listAllAPI(provider: String): API
     listVersion(apiName: String): String
     listApplications(applicationOwner: String): Application
     listProviders: String
 
+#alert
     getAllAPIAlertConfig: [APIAlertConfig]
     getAllAppAlertConfig: [AppAlertConfig]
-    getAlertSubscription(userId: String): AlertSubscription
+    getAlertSubscription(userId: String!): AlertSubscription
+
+#overview
+    getTotalTraffic(from: String!, to: String!): Int
+    getAvgErrorRate(from: String, to: String): Int
+    getOverallLatencyv(from: String, to: String): Int
+    getApiAvailability(from: String, to: String): ApiAvailability
+    getLatencySummary(from: String, to: String): LatencySummary
+
+#errors
+    getTargetErrorsOverTime(from: String, to: String, apiId: String, appId: String): TargetErrorsOverTime
+    getGatewayErrorsOverTime(from: String, to: String, apiId: String, appId: String): GatewayErrorsOverTime
+    getTargetErrorsMap(from: String, to: String, apiId: String, appId: String): [ErrorsMap]
+    getGatewayErrorsMap(from: String, to: String, apiId: String, appId: String): [ErrorsMap]
+    getErrorsByCategory(from: String, to: String, apiId: String): ErrorsByCategory
+
 }
 
 type Mutation {
@@ -99,6 +116,56 @@ type ApiLatencySummary {
 }
 
 type Application {
+    id: String
     name: String
     owner: String
+}
+
+type ApiAvailability {
+    availableCount: Int
+    highResponseTimeCount: Int
+    serverErrorCount: Int
+}
+
+type LatencySummary {
+    time: String
+    requestCount: Int
+    errorCount: Int
+    latencyTime: Int
+}
+
+type API {
+    id: String
+    name: String
+    version: String
+    provider: String
+}
+
+type TargetErrorsOverTime {
+    time: String
+    _4xx: Int
+    _5xx: Int
+}
+
+type GatewayErrorsOverTime {
+    time: String
+    authentication: Int
+    throttled: Int
+    resourceNotFound: Int
+    others: Int
+}
+
+type ErrorsMap {
+    label: String
+    counts: [IntMap]
+}
+
+type IntMap {
+    key: String
+    value: Int
+}
+
+type ErrorsByCategory {
+    code: Int
+    count: Int
 }

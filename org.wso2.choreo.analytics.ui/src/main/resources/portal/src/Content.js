@@ -35,7 +35,7 @@ class Content extends Component {
         this.envHandleChange = this.envHandleChange.bind(this);
         this.refreshClick = this.refreshClick.bind(this);
         const httpLink = createHttpLink({
-            uri: 'http://localhost:8080/analytics-restapi/query',
+            uri: window.location.href + 'analytics-restapi/query',
             credentials: 'include'
         });
         const envLink = setContext((_, { headers }) => {

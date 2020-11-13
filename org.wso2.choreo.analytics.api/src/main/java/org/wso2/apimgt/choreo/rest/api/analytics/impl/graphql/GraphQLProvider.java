@@ -34,6 +34,7 @@ import org.wso2.apimgt.choreo.rest.api.analytics.impl.interceptor.Authentication
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Map;
 
 import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
 
@@ -83,9 +84,10 @@ public class GraphQLProvider {
         return instance;
     }
 
-    public ExecutionResult execute(AuthenticationContext context, String query) {
+    public ExecutionResult execute(AuthenticationContext context, String query, Map<String, Object> variables) {
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
                 .query(query)
+                .variables(variables)
                 .context(context)
                 .build();
         ExecutionResult executionResult = graphQL.execute(executionInput);

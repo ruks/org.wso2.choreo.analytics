@@ -41,11 +41,12 @@ public class Configuration {
     private String cookieHostName;
 
     private static Configuration configuration;
+
     private Configuration() {
     }
 
     public synchronized static Configuration getInstance() {
-        if(configuration == null) {
+        if (configuration == null) {
             configuration = new Configuration();
             configuration.load();
         }
@@ -53,8 +54,8 @@ public class Configuration {
     }
 
     private void load() {
-        InputStream propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("application"
-                + ".properties");
+        InputStream propStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("application" + ".properties");
         Properties properties = new Properties();
         try {
             properties.load(propStream);
@@ -77,9 +78,10 @@ public class Configuration {
         oidcLogoutcallBack = properties.getProperty("oidcLogoutcallBack");
         cookieHostName = properties.getProperty("cookieHostName");
 
-
-        System.setProperty("javax.net.ssl.trustStore", trustStore);
-        System.setProperty("javax.net.ssl.trustStorePassword", trustPassword);
+        if (trustStore != null && trustPassword != null) {
+            System.setProperty("javax.net.ssl.trustStore", trustStore);
+            System.setProperty("javax.net.ssl.trustStorePassword", trustPassword);
+        }
     }
 
     public String getTokenEndpoint() {

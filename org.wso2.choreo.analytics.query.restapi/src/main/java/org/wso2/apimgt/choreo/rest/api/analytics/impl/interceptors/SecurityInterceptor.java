@@ -74,7 +74,7 @@ public class SecurityInterceptor implements HandlerInterceptor {
             request.setAttribute("authContext", context);
             return true;
         } catch (Exception e) {
-            log.error("Error occurred while validating token");
+            log.error("Error occurred while validating token", e);
             return false;
         }
 
@@ -98,10 +98,24 @@ public class SecurityInterceptor implements HandlerInterceptor {
                 part2Value = aCookie.getValue();
             }
         }
-        if (part1Value == null || part2Value == null) {
+        if (part1Value == null && part2Value == null) {
+            String authHeader = request.getHeader("Authorization");
+            return getToken(authHeader);
+        } else if (part1Value == null || part2Value == null) {
             log.error("Cookie '" + part1Name + "' and '" + part2Name + " 'not found in the cookies.");
             return null;
         }
         return part1Value + part2Value;
+    }
+
+    public static String getToken(String tokeHeader) {
+        if(tokeHeader == null) {
+            return null;
+        }
+        String[] parts = tokeHeader.split("bearer");
+        if(parts.length == 2) {
+            return parts[1].trim();
+        }
+        return null;
     }
 }

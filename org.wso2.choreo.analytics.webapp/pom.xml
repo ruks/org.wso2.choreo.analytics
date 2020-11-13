@@ -41,6 +41,7 @@
 
 	</dependencies>
 	<build>
+		<finalName>choreo-analytics</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>

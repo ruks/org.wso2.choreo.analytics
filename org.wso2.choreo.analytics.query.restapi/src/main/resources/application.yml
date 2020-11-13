@@ -1,17 +1,17 @@
 analytics:
   datasource:
     username: admin
-    password: pass
+    password: admin
     driver: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://localhost;database=alert
+    url: jdbc:sqlserver://analytics-apim.database.windows.net:1433;database=testdb
   kusto:
-    clientid: clientid
-    pass: pass
-    auth: auth
-    url: url
-    database: apim
+    clientid: ssdfdsfdsfsdfsdfsd
+    pass: sdfsdfdsfefsdfdsf
+    auth: sdfdfsdfdsfsdf
+    url: http://localhost:9090
+    database: testdvb
   security:
-    trustStore: /Users/rukshan/wso2/apim/coreo/wso2is-5.10.0/repository/resources/security/client-truststore.jks
-    trustStorePass: wso2carbon
-    jwks: https://localhost:9443/oauth2/jwks
-    jwksIssuer: https://localhost:9443/oauth2/token
+#    trustStore: /Users/rukshan/wso2/apim/coreo/wso2is-5.10.0/repository/resources/security/client-truststore.jks
+#    trustStorePass: wso2carbon
+    jwks: https://localhost:9444/oauth2/jwks
+    jwksIssuer: https://localhost:9444:443/oauth2/token
