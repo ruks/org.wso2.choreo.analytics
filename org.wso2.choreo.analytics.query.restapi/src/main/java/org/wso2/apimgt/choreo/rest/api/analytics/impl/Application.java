@@ -16,7 +16,7 @@ import javax.annotation.PostConstruct;
 @EnableOpenApi
 @ComponentScan(basePackages = { "org.wso2.apimgt.choreo.rest.api.analytics.impl",
         "org.wso2.apimgt.choreo.rest.api.analytics.v1", "org.wso2.apimgt.choreo" })
-public class Application extends SpringBootServletInitializer {
+public class Application {
     @Autowired
     private Configuration configuration;
 

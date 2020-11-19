@@ -1,7 +1,7 @@
 # How to run
 1. build the project with `mvn clean install`
 2. run it with, `java -jar target/org.wso2.apimgt.choreo.api-0.1-SNAPSHOT.jar`
-3. update required credentials of Azure and ADX in kusto.properties
+3. update required credentials of Azure and ADX in org.wso2.choreo.analytics.gql.kusto.properties
 
 # How to test
 1. Connect to the WS `ws://localhost:9010/choreo/api/analytics`

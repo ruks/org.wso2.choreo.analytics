@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.apimgt.choreo.rest.api.analytics.impl.security;
+package org.wso2.choreo.analytics.gql.security;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.source.JWKSource;
@@ -29,9 +29,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
-import org.wso2.apimgt.choreo.rest.api.analytics.impl.config.ConfigHolder;
-import org.wso2.apimgt.choreo.rest.api.analytics.impl.config.Security;
-import org.wso2.apimgt.choreo.rest.api.analytics.impl.interceptor.AuthenticationContext;
+import org.wso2.choreo.analytics.gql.config.ConfigHolder;
+import org.wso2.choreo.analytics.gql.config.Security;
 
 import java.net.MalformedURLException;
 import java.net.URL;

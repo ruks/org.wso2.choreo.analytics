@@ -37,6 +37,7 @@
         <module>org.wso2.choreo.analytics.query.restapi</module>
         <module>org.wso2.choreo.analytics.ui</module>
         <module>org.wso2.choreo.analytics.webapp</module>
+        <module>org.wso2.choreo.analytics.gql</module>
     </modules>
 
     <dependencyManagement>
