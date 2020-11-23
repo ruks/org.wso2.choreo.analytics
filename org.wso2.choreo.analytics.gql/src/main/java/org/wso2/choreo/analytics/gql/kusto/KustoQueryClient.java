@@ -19,29 +19,33 @@
 
 package org.wso2.choreo.analytics.gql.kusto;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.kusto.data.ClientImpl;
 import com.microsoft.azure.kusto.data.ClientRequestProperties;
 import com.microsoft.azure.kusto.data.ConnectionStringBuilder;
 import com.microsoft.azure.kusto.data.KustoOperationResult;
 import com.microsoft.azure.kusto.data.KustoResultColumn;
-import org.springframework.stereotype.Component;
-import org.wso2.choreo.analytics.gql.Query;
+import com.microsoft.azure.kusto.data.exceptions.DataClientException;
+import com.microsoft.azure.kusto.data.exceptions.DataServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.choreo.analytics.gql.config.ConfigHolder;
 import org.wso2.choreo.analytics.gql.config.Kusto;
-import org.wso2.choreo.analytics.gql.security.JWTUserDetails;
+import org.wso2.choreo.analytics.gql.impl.DataFetchingException;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component
 public class KustoQueryClient {
+    private static final Logger log = LoggerFactory.getLogger(KustoQueryClient.class);
     private ClientImpl client;
     private String dbName;
     private ClientRequestProperties clientRequestProperties;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     private void init() {
         Kusto kusto = ConfigHolder.getInstance().getConfiguration().getKusto();
@@ -71,56 +75,35 @@ public class KustoQueryClient {
         return client;
     }
 
-    public List<Map<String, Object>> getLatencyData(String from, String to, int limit, String orderBy, boolean asc,
-            String tenant, String orgID, List<String> selects, List<String> filters, List<String> groupBy) {
-        String query = "analytics_poc_pipeline_latency_test\n" + "| where AGG_WINDOW_START_TIME > datetime(" + from
-                + ") and AGG_WINDOW_START_TIME < " + "datetime(" + to + ")\n" + "| where apiCreatorTenantDomain == '"
-                + tenant + "'" + (filters.size() > 0 ? " and " + String.join(" and ", filters) : "") + "\n"
-                + "| summarize max(avgResponseLatency), max(avgServiceLatency), max(avgBackendLatency), max"
-                + "(avgRequestMediationLatency), max(avgResponseMediationLatency), max(avgSecurityLatency), max"
-                + "(avgThrottlingLatency), max(avgOtherLatency) by " + (groupBy.size() > 0 ? String.join(",", groupBy) :
-                "") + "\n" + "| project-rename avgResponseLatency = max_avgResponseLatency,  avgServiceLatency = "
-                + "max_avgServiceLatency, avgBackendLatency=max_avgBackendLatency, "
-                + "avgRequestMediationLatency=max_avgRequestMediationLatency,  "
-                + "avgResponseMediationLatency=max_avgResponseMediationLatency, "
-                + "avgSecurityLatency=max_avgSecurityLatency, avgThrottlingLatency=max_avgThrottlingLatency, "
-                + "avgOtherLatency=max_avgOtherLatency" + "\n" + "| project " + String.join(",", selects) + "\n"
-                + "| top " + limit + " by " + orderBy + " " + (asc ? "asc" : "desc");
-
-        return execute(query);
-    }
-
-    public List<Map<String, Object>> getAllApis(JWTUserDetails user) {
-        String query = QueryProcessor.getQuery(QueryProcessor.listAPI, user);
-        List<Map<String, Object>> map = execute(query);
-        return map;
-    }
-
-    public List<Map<String, Object>> getAllApis(JWTUserDetails user, String provider) {
-        String query = QueryProcessor.getQuery(QueryProcessor.listAPI, user);
-        List<Map<String, Object>> map = execute(query);
-        return map;
-    }
-
-    public List<Map<String, Object>> execute(String query) {
+    public List<Map<String, Object>> execute(String query) throws QueryException {
+        ClientImpl client = getClient();
+        KustoOperationResult results;
         try {
-
-            ClientImpl client = getClient();
-            KustoOperationResult results = client.execute(dbName, query, clientRequestProperties);
-            KustoResultColumn[] columns = results.getPrimaryResults().getColumns();
-            ArrayList<ArrayList<Object>> rows = results.getPrimaryResults().getData();
-            List<Map<String, Object>> list = new ArrayList<>();
-            for (ArrayList<Object> aRow : rows) {
-                Map<String, Object> aMap = new HashMap<>();
-                for (int i = 0; i < columns.length; i++) {
-                    aMap.put(columns[i].getColumnName(), aRow.get(i));
-                }
-                list.add(aMap);
-            }
-            return list;
-        } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("executing kusto query: " + query);
+            results = client.execute(dbName, query, clientRequestProperties);
+        } catch (DataServiceException | DataClientException e) {
+            throw new QueryException("Error occurred while queries data.", e);
         }
-        return Collections.EMPTY_LIST;
+        KustoResultColumn[] columns = results.getPrimaryResults().getColumns();
+        ArrayList<ArrayList<Object>> rows = results.getPrimaryResults().getData();
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (ArrayList<Object> aRow : rows) {
+            Map<String, Object> aMap = new HashMap<>();
+            for (int i = 0; i < columns.length; i++) {
+                aMap.put(columns[i].getColumnName(), aRow.get(i));
+            }
+            list.add(aMap);
+        }
+        return list;
+    }
+
+    final <T> T convertTo(Object o, TypeReference<T> typeReference) throws IllegalArgumentException {
+        try {
+                T converted = mapper.convertValue(o, typeReference);
+            return converted;
+        } catch (IllegalArgumentException e) {
+            log.error("Error occurred while formatting requested data.", e);
+            throw new DataFetchingException("Error occurred while formatting requested data.");
+        }
     }
 }

@@ -17,21 +17,10 @@
  *
  */
 
-package org.wso2.choreo.analytics.gql.impl;
+package org.wso2.choreo.analytics.gql.kusto;
 
-import org.springframework.stereotype.Component;
-import org.wso2.choreo.analytics.gql.ApiLatencySummary;
-import org.wso2.choreo.analytics.gql.DataFetchersDelegateApiLatencySummary;
-
-import java.util.Arrays;
-import java.util.List;
-
-@Component
-public class DataFetchersDelegateApiLatencySummaryImpl implements DataFetchersDelegateApiLatencySummary {
-    @Override
-    public List<ApiLatencySummary> batchLoader(List<String> keys) {
-        ApiLatencySummary summary = new ApiLatencySummary();
-        summary.setId("1231312321L");
-        return Arrays.asList(summary);
+public class QueryException extends Exception {
+    public QueryException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

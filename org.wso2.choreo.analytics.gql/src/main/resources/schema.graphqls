@@ -4,33 +4,50 @@ schema {
 }
 
 type Query {
-    getApiErrorSummary(from: Int, to: Int, limit: Int, orderBy: String, asc: Boolean): ApiErrorSummary
-    getApiLatencySummary(from: String, to: String, limit: Int, orderBy: String, asc: Boolean, apiName: String, apiVersion: String, apiResourceTemplate: String, apiMethod: String): [ApiLatencySummary]
 
     #util
-    listAllAPI(provider: String): [API]
-    listVersion(apiName: String): [String]
-    listApplications(applicationOwner: String): [Application]
-    listProviders: [String]
+    listAllAPI(provider: String, environment: Environment!): [API]
+    listVersion(apiName: String, environment: Environment!): [String]
+    listApplications(owner: String, environment: Environment!): [Application]
+    listProviders(environment: Environment!): [Provider]
 
     #alert
-    getAllAPIAlertConfig: [APIAlertConfig]
-    getAllAppAlertConfig: [AppAlertConfig]
-    getAlertSubscription: AlertSubscription
+    getAllAPIAlertConfig(environment: Environment!): [APIAlertConfig]
+    getAllAppAlertConfig(environment: Environment!): [AppAlertConfig]
+    getAlertSubscription(environment: Environment!): AlertSubscription
 
     #overview
-    getTotalTraffic(filter: TotalTrafficFilter!, environment: Environment!): Int
-    getAvgErrorRate(from: String, to: String): Int
-    getOverallLatencyv(from: String, to: String): Int
-    getApiAvailability(from: String, to: String): ApiAvailability
-    getLatencySummary(from: String, to: String): LatencySummary
+    getTotalTraffic(filter: TimeFilter!, environment: Environment!): Int
+    getAvgErrorRate(filter: TimeFilter!, environment: Environment!): Int
+    getOverallLatency(filter: TimeFilter!, environment: Environment!): Int
+    getApiAvailability(filter: TimeFilter!, environment: Environment!): ApiAvailability
+    getLatencySummary(filter: TimeFilter!, environment: Environment!): LatencySummary
 
     #error
-    getTargetErrorsOverTime(from: String, to: String, apiId: String, appId: String): TargetErrorsOverTime
-    getGatewayErrorsOverTime(from: String, to: String, apiId: String, appId: String): GatewayErrorsOverTime
-    getTargetErrorsMap(from: String, to: String, apiId: String, appId: String): [ErrorsMap]
-    getGatewayErrorsMap(from: String, to: String, apiId: String, appId: String): [ErrorsMap]
-    getErrorsByCategory(from: String, to: String, apiId: String): ErrorsByCategory
+    getTargetErrorsOverTime(filter: ErrorsOverTimeFilter!, environment: Environment!): [TargetErrorsOverTime]
+    getGatewayErrorsOverTime(filter: ErrorsOverTimeFilter!, environment: Environment!): [GatewayErrorsOverTime]
+    getTargetErrorsMap(filter: ErrorsOverTimeFilter!, environment: Environment!): [ErrorsMap]
+    getGatewayErrorsMap(filter: ErrorsOverTimeFilter!, environment: Environment!): [ErrorsMap]
+    getErrorsByCategory(filter: ErrorsByCategoryFilter!, environment: Environment!): [ErrorsByCategory]
+
+    # traffic
+    getAPIUsageOverTime(filter: APIUsageFilter!, environment: Environment!): [IntMap]
+    getAPIUsageByApp(filter: APIUsageFilter!, environment: Environment!): [IntMap]
+    getAPIUsageByAppOverTime(filter: APIUsageFilter!, environment: Environment!): [IntMap]
+    getTargetUsage(filter: TimeFilter!, environment: Environment!): [IntMap]
+    getTargetUsageOverTime(filter: TimeFilter!, environment: Environment!): [IntMap]
+    getResourceUsage(filter: ResourceUsageFilter!, environment: Environment!): [ResourceUsage]
+
+    # latency
+    topSlowestAPIs(filter: TimeFilter!, environment: Environment!): [IntMap]
+    getLatency(filter: LatencyFilter!, environment: Environment!): [Latency]
+
+    #cache
+    getCacheHits(filter: LatencyFilter!, environment: Environment!): [CacheHits]
+
+    #device
+    getTopPlatforms(filter: DeviceFilter!, environment: Environment!): [IntMap]
+    getTopAgents(filter: DeviceFilter!, environment: Environment!): [IntMap]
 
 }
 
@@ -41,6 +58,7 @@ type Mutation {
     UnSubscribeAlert(userId: String): AlertSubscription
 }
 
+# type
 type AlertSubscription {
     alertTypes: String
     emails: String
@@ -61,28 +79,7 @@ type APIAlertConfig {
     thresholdBackendTime: Int
 }
 
-input APIAlertConfigInput {
-    apiName: String
-    apiVersion: String
-    thresholdResponseTime: Int
-    thresholdBackendTime: Int
-}
-
-input AppAlertConfigInput {
-    apiName: String
-    apiVersion: String
-    appName: String
-    appOwner: String
-    thresholdRequestCount: Int
-}
-
-input AlertSubscriptionInput {
-    alertTypes: String
-    emails: String
-}
-
 type ApiErrorSummary {
-    id: ID
     apiName: String
     apiVersion: String
     uriTemplate: String
@@ -97,7 +94,6 @@ type ApiErrorSummary {
 }
 
 type ApiLatencySummary {
-    id: ID
     apiCreatorTenantDomain: String
     apiName: String
     apiVersion: String
@@ -119,6 +115,10 @@ type Application {
     owner: String
 }
 
+type Provider {
+    name: String
+}
+
 type ApiAvailability {
     availableCount: Int
     highResponseTimeCount: Int
@@ -133,10 +133,10 @@ type LatencySummary {
 }
 
 type API {
-    apiId: ID
-    apiName: String
-    apiVersion: String
-    apiCreator: String
+    id: ID
+    name: String
+    version: String
+    provider: String
 }
 
 type TargetErrorsOverTime {
@@ -168,22 +168,102 @@ type ErrorsByCategory {
     count: Int
 }
 
-interface Duration {
-    from: Int!
-    to: Int!
+type Latency {
+    time: String
+    backend: Int
+    requestMed: Int
+    responseMed: Int
+}
+
+type CacheHits {
+    time: String
+    hits: Int
+    missed: Int
+}
+
+type ResourceUsage {
+    apiName: String
+    apiVersion: String
+    target: String
+    verb: String
+    count: Int
+}
+
+# input
+input APIAlertConfigInput {
+    apiName: String
+    apiVersion: String
+    thresholdResponseTime: Int
+    thresholdBackendTime: Int
+}
+
+input AppAlertConfigInput {
+    apiName: String
+    apiVersion: String
+    appName: String
+    appOwner: String
+    thresholdRequestCount: Int
+}
+
+input AlertSubscriptionInput {
+    alertTypes: String
+    emails: String
+}
+
+input ErrorsOverTimeFilter {
+    from: String
+    to: String
+    apiId: String
+    appId: String
+}
+
+input APIUsageFilter {
+    from: String
+    to: String
+    apiId: String
+    appId: String
+}
+
+input ErrorsByCategoryFilter {
+    from: String
+    to: String
+    apiId: String
+}
+
+input CacheFilter {
+    from: String
+    to: String
+    apiId: String
+}
+
+input DeviceFilter {
+    from: String
+    to: String
+    apiId: String
 }
 
 input Environment {
     name: String!
 }
 
-interface Order {
-    orderBy: String
-    asc: Boolean
-    limit: Int
-}
-
-input TotalTrafficFilter {
+input TimeFilter {
     from: String!
     to: String!
+}
+
+input ResourceUsageFilter {
+    from: String
+    to: String
+    apiId: String
+    appId: String
+    target: String
+    verb: String
+}
+
+input LatencyFilter {
+    from: String
+    to: String
+    apiId: String
+    target: String
+    verb: String
 }

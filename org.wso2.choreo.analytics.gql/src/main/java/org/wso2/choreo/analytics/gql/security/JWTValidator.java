@@ -19,9 +19,11 @@
 
 package org.wso2.choreo.analytics.gql.security;
 
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.jwk.source.RemoteJWKSet;
+import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jose.proc.JWSKeySelector;
 import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.jose.proc.SecurityContext;
@@ -34,6 +36,7 @@ import org.wso2.choreo.analytics.gql.config.Security;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -69,13 +72,9 @@ public class JWTValidator {
         return validator;
     }
 
-    public AuthenticationContext validate(String token) throws Exception {
+    public JWTClaimsSet validate(String token) throws ParseException, JOSEException, BadJOSEException {
         SecurityContext ctx = null;
         JWTClaimsSet claimsSet = this.jwtProcessor.process(token, ctx);
-
-        AuthenticationContext context = new AuthenticationContext();
-        context.setUsername(claimsSet.getSubject());
-        System.out.println("Subject: " + context.getUsername());
-        return context;
+        return claimsSet;
     }
 }

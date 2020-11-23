@@ -20,38 +20,19 @@
 package org.wso2.choreo.analytics.gql.kusto;
 
 import org.apache.commons.lang.text.StrSubstitutor;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.wso2.choreo.analytics.gql.security.JWTUserDetails;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class QueryProcessor {
-    public static String listAPI = "analytics_poc_pipeline_request_test\n"
-            + "| where apiCreatorTenantDomain == \"${tenant}\" and customerId == \"${customerId}\"\n"
-            + "| summarize by apiId, apiName, apiVersion, apiCreator\n" + "| top 50 by apiName asc \n";
-    public static String listAPIOfProvider = "analytics_poc_pipeline_request_test\n"
-            + "| where apiCreatorTenantDomain == \"${tenant}\" and customerId == \"${customerId}\"\n"
-            + "| summarize by apiId, apiName, apiVersion, apiCreator\n" + "| top 50 by apiName asc \n";
-
-
-//    public static void main(String[] args) {
-//        StrSubstitutor.replaceSystemProperties(
-//                "You are running with java.version = ${java.version} and os.name = ${os.name}.");
-//        Map valuesMap = new HashMap();
-//        valuesMap.put("animal", "quick brown fox");
-//        valuesMap.put("target", "lazy dog");
-//        String templateString = "The ${animal} jumped over the ${target}.";
-//        StrSubstitutor sub = new StrSubstitutor(valuesMap);
-//        String resolvedString = sub.replace(templateString);
-//        System.out.println(resolvedString);
-//    }
-//
-    public static String getQuery(String query, JWTUserDetails user) {
-        Map valuesMap = new HashMap();
-        valuesMap.put("tenant", user.getTenant());
-        valuesMap.put("customerId", user.getCustomerId());
-        StrSubstitutor sub = new StrSubstitutor(valuesMap);
+    public static String applyUserDetails(String query, JWTUserDetails user, Map<String, Object> parasMap) {
+        if(parasMap == null) {
+            parasMap = new HashMap<>();
+        }
+        parasMap.put("tenant", user.getTenant());
+        parasMap.put("customerId", user.getCustomerId());
+        StrSubstitutor sub = new StrSubstitutor(parasMap);
         String resolvedString = sub.replace(query);
         return resolvedString;
     }

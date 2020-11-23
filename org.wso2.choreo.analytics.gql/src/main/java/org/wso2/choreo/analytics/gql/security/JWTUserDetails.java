@@ -72,4 +72,5 @@ public class JWTUserDetails implements UserDetails {
     public String getCustomerId() {
         return customerId;
     }
+
 }

@@ -19,15 +19,8 @@
 
 package org.wso2.choreo.analytics.gql.impl;
 
-import org.springframework.stereotype.Component;
-import org.wso2.choreo.analytics.gql.DataFetchersDelegateApiErrorSummary;
-
-import java.util.List;
-
-@Component
-public class ApiErrorSummary implements DataFetchersDelegateApiErrorSummary {
-    @Override
-    public List<org.wso2.choreo.analytics.gql.ApiErrorSummary> batchLoader(List<String> keys) {
-        return null;
+public class DataFetchingException extends RuntimeException {
+    public DataFetchingException(String message) {
+        super(message);
     }
 }

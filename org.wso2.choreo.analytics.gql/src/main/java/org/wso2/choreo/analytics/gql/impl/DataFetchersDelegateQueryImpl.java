@@ -19,107 +19,127 @@
 
 package org.wso2.choreo.analytics.gql.impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.schema.DataFetchingEnvironment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.wso2.choreo.analytics.gql.API;
 import org.wso2.choreo.analytics.gql.APIAlertConfig;
+import org.wso2.choreo.analytics.gql.APIUsageFilter;
 import org.wso2.choreo.analytics.gql.AlertSubscription;
 import org.wso2.choreo.analytics.gql.ApiAvailability;
-import org.wso2.choreo.analytics.gql.ApiErrorSummary;
-import org.wso2.choreo.analytics.gql.ApiLatencySummary;
 import org.wso2.choreo.analytics.gql.AppAlertConfig;
 import org.wso2.choreo.analytics.gql.Application;
+import org.wso2.choreo.analytics.gql.CacheHits;
 import org.wso2.choreo.analytics.gql.DataFetchersDelegateQuery;
+import org.wso2.choreo.analytics.gql.DeviceFilter;
 import org.wso2.choreo.analytics.gql.Environment;
 import org.wso2.choreo.analytics.gql.ErrorsByCategory;
+import org.wso2.choreo.analytics.gql.ErrorsByCategoryFilter;
 import org.wso2.choreo.analytics.gql.ErrorsMap;
+import org.wso2.choreo.analytics.gql.ErrorsOverTimeFilter;
 import org.wso2.choreo.analytics.gql.GatewayErrorsOverTime;
+import org.wso2.choreo.analytics.gql.IntMap;
+import org.wso2.choreo.analytics.gql.Latency;
+import org.wso2.choreo.analytics.gql.LatencyFilter;
 import org.wso2.choreo.analytics.gql.LatencySummary;
+import org.wso2.choreo.analytics.gql.Provider;
+import org.wso2.choreo.analytics.gql.ResourceUsage;
+import org.wso2.choreo.analytics.gql.ResourceUsageFilter;
 import org.wso2.choreo.analytics.gql.TargetErrorsOverTime;
-import org.wso2.choreo.analytics.gql.TotalTrafficFilter;
+import org.wso2.choreo.analytics.gql.TimeFilter;
 import org.wso2.choreo.analytics.gql.alert.AlertDAO;
-import org.wso2.choreo.analytics.gql.kusto.KustoQueryClient;
+import org.wso2.choreo.analytics.gql.kusto.QueryException;
+import org.wso2.choreo.analytics.gql.kusto.UtilQueryExecutor;
 import org.wso2.choreo.analytics.gql.security.JWTUserDetails;
 import org.wso2.choreo.analytics.gql.security.UserService;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class DataFetchersDelegateQueryImpl implements DataFetchersDelegateQuery {
+    private static final Logger log = LoggerFactory.getLogger(DataFetchersDelegateQueryImpl.class);
     private final UserService userService;
-    private KustoQueryClient kustoQueryClient;
+    private UtilQueryExecutor utilQueryExecutor;
 
-    public DataFetchersDelegateQueryImpl(UserService userService, KustoQueryClient kustoQueryClient) {
+    public DataFetchersDelegateQueryImpl(UserService userService, UtilQueryExecutor utilQueryExecutor) {
         this.userService = userService;
-        this.kustoQueryClient = kustoQueryClient;
-    }
-
-    @Override
-    public ApiErrorSummary getApiErrorSummary(DataFetchingEnvironment dataFetchingEnvironment, Integer from, Integer to,
-            Integer limit, String orderBy, Boolean asc) {
-        return null;
-    }
-
-    @Override
-    public List<ApiLatencySummary> getApiLatencySummary(DataFetchingEnvironment dataFetchingEnvironment, String from,
-            String to, Integer limit, String orderBy, Boolean asc, String apiName, String apiVersion,
-            String apiResourceTemplate, String apiMethod) {
-        ApiLatencySummary summary = new ApiLatencySummary();
-        summary.setId("1231312321L");
-        return Arrays.asList(summary);
+        this.utilQueryExecutor = utilQueryExecutor;
     }
 
     @PreAuthorize("isAuthenticated()")
     @Override
-    public List<API> listAllAPI(DataFetchingEnvironment dataFetchingEnvironment, String provider) {
+    public List<API> listAllAPI(DataFetchingEnvironment dataFetchingEnvironment, String provider,
+            Environment environment) {
         JWTUserDetails user = userService.getCurrentUser();
-        List list;
-        if(provider == null) {
-            list = kustoQueryClient.getAllApis(user);
-        } else {
-            list = kustoQueryClient.getAllApis(user, provider);
+        List<API> apis;
+        try {
+            if (provider == null) {
+                apis = utilQueryExecutor.getAllApis(user, environment.getName());
+            } else {
+                apis = utilQueryExecutor.getAllApis(user, environment.getName(), provider);
+            }
+            return apis;
+        } catch (QueryException e) {
+            log.error("Error while getting APIs.", e);
+            throw new DataFetchingException("Error while getting APIs.");
         }
-
-        ObjectMapper mapper = new ObjectMapper();
-        List<API> apis = mapper.convertValue(list, new TypeReference<>() {});
-
-        return apis;
     }
 
     @Override
-    public List<String> listVersion(DataFetchingEnvironment dataFetchingEnvironment, String apiName) {
-        return null;
-    }
-
-    @Override
-    public List<Application> listApplications(DataFetchingEnvironment dataFetchingEnvironment,
-            String applicationOwner) {
-        return null;
-    }
-
-    @Override
-    public List<String> listProviders(DataFetchingEnvironment dataFetchingEnvironment) {
-        return null;
-    }
-
-    @Override
-    public List<APIAlertConfig> getAllAPIAlertConfig(DataFetchingEnvironment dataFetchingEnvironment) {
-        return null;
-    }
-
-    @Override
-    public List<AppAlertConfig> getAllAppAlertConfig(DataFetchingEnvironment dataFetchingEnvironment) {
-        return null;
+    public List<String> listVersion(DataFetchingEnvironment dataFetchingEnvironment, String apiName,
+            Environment environment) {
+        throw new DataFetchingException("Not supported.");
     }
 
     @Override
     @PreAuthorize("isAuthenticated()")
-    public AlertSubscription getAlertSubscription(DataFetchingEnvironment dataFetchingEnvironment) {
+    public List<Application> listApplications(DataFetchingEnvironment dataFetchingEnvironment, String owner,
+            Environment environment) {
+        JWTUserDetails user = userService.getCurrentUser();
+        List<Application> applications;
+        try {
+            if (owner == null) {
+                applications = utilQueryExecutor.getAllApplications(user, environment.getName());
+            } else {
+                applications = utilQueryExecutor.getAllApplications(user, environment.getName(), owner);
+            }
+            return applications;
+        } catch (QueryException e) {
+            log.error("Error while getting applications.", e);
+            throw new DataFetchingException("Error while getting applications.");
+        }
+    }
+
+    @Override
+    @PreAuthorize("isAuthenticated()")
+    public List<Provider> listProviders(DataFetchingEnvironment dataFetchingEnvironment, Environment environment) {
+        JWTUserDetails user = userService.getCurrentUser();
+        try {
+            return utilQueryExecutor.getProviders(user, environment.getName());
+        } catch (QueryException e) {
+            log.error("Error while getting providers.", e);
+            throw new DataFetchingException("Error while getting providers.");
+        }
+    }
+
+    @Override
+    public List<APIAlertConfig> getAllAPIAlertConfig(DataFetchingEnvironment dataFetchingEnvironment,
+            Environment environment) {
+        throw new DataFetchingException("Not supported.");
+    }
+
+    @Override
+    public List<AppAlertConfig> getAllAppAlertConfig(DataFetchingEnvironment dataFetchingEnvironment,
+            Environment environment) {
+        throw new DataFetchingException("Not supported.");
+    }
+
+    @Override
+    @PreAuthorize("isAuthenticated()")
+    public AlertSubscription getAlertSubscription(DataFetchingEnvironment dataFetchingEnvironment,
+            Environment environment) {
         JWTUserDetails user = userService.getCurrentUser();
         AlertDAO dao = AlertDAO.getInstance();
         return dao.getAlertSubscription(user);
@@ -127,58 +147,128 @@ public class DataFetchersDelegateQueryImpl implements DataFetchersDelegateQuery 
 
     @Override
     @PreAuthorize("isAuthenticated()")
-    public Integer getTotalTraffic(DataFetchingEnvironment dataFetchingEnvironment, TotalTrafficFilter filter,
+    public Integer getTotalTraffic(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
             Environment environment) {
-        return null;
+        throw new DataFetchingException("Not supported.");
     }
 
     @Override
-    public Integer getAvgErrorRate(DataFetchingEnvironment dataFetchingEnvironment, String from, String to) {
-        return null;
+    public Integer getAvgErrorRate(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
+            Environment environment) {
+        throw new DataFetchingException("Not supported.");
     }
 
     @Override
-    public Integer getOverallLatencyv(DataFetchingEnvironment dataFetchingEnvironment, String from, String to) {
-        return null;
+    public Integer getOverallLatency(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
+            Environment environment) {
+        throw new DataFetchingException("Not supported.");
     }
 
     @Override
-    public ApiAvailability getApiAvailability(DataFetchingEnvironment dataFetchingEnvironment, String from, String to) {
-        return null;
+    public ApiAvailability getApiAvailability(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
+            Environment environment) {
+        throw new DataFetchingException("Not supported.");
     }
 
     @Override
-    public LatencySummary getLatencySummary(DataFetchingEnvironment dataFetchingEnvironment, String from, String to) {
-        return null;
+    public LatencySummary getLatencySummary(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
+            Environment environment) {
+        throw new DataFetchingException("Not supported.");
     }
 
     @Override
-    public TargetErrorsOverTime getTargetErrorsOverTime(DataFetchingEnvironment dataFetchingEnvironment, String from,
-            String to, String apiId, String appId) {
-        return null;
+    public List<TargetErrorsOverTime> getTargetErrorsOverTime(DataFetchingEnvironment dataFetchingEnvironment,
+            ErrorsOverTimeFilter filter, Environment environment) {
+        throw new DataFetchingException("Not supported.");
     }
 
     @Override
-    public GatewayErrorsOverTime getGatewayErrorsOverTime(DataFetchingEnvironment dataFetchingEnvironment, String from,
-            String to, String apiId, String appId) {
-        return null;
+    public List<GatewayErrorsOverTime> getGatewayErrorsOverTime(DataFetchingEnvironment dataFetchingEnvironment,
+            ErrorsOverTimeFilter filter, Environment environment) {
+        throw new DataFetchingException("Not supported.");
     }
 
     @Override
-    public List<ErrorsMap> getTargetErrorsMap(DataFetchingEnvironment dataFetchingEnvironment, String from, String to,
-            String apiId, String appId) {
-        return null;
+    public List<ErrorsMap> getTargetErrorsMap(DataFetchingEnvironment dataFetchingEnvironment,
+            ErrorsOverTimeFilter filter, Environment environment) {
+        throw new DataFetchingException("Not supported.");
     }
 
     @Override
-    public List<ErrorsMap> getGatewayErrorsMap(DataFetchingEnvironment dataFetchingEnvironment, String from, String to,
-            String apiId, String appId) {
-        return null;
+    public List<ErrorsMap> getGatewayErrorsMap(DataFetchingEnvironment dataFetchingEnvironment,
+            ErrorsOverTimeFilter filter, Environment environment) {
+        throw new DataFetchingException("Not supported.");
     }
 
     @Override
-    public ErrorsByCategory getErrorsByCategory(DataFetchingEnvironment dataFetchingEnvironment, String from, String to,
-            String apiId) {
-        return null;
+    public List<ErrorsByCategory> getErrorsByCategory(DataFetchingEnvironment dataFetchingEnvironment,
+            ErrorsByCategoryFilter filter, Environment environment) {
+        throw new DataFetchingException("Not supported.");
+    }
+
+    @Override
+    public List<IntMap> getAPIUsageOverTime(DataFetchingEnvironment dataFetchingEnvironment, APIUsageFilter filter,
+            Environment environment) {
+        throw new DataFetchingException("Not supported.");
+    }
+
+    @Override
+    public List<IntMap> getAPIUsageByApp(DataFetchingEnvironment dataFetchingEnvironment, APIUsageFilter filter,
+            Environment environment) {
+        throw new DataFetchingException("Not supported.");
+    }
+
+    @Override
+    public List<IntMap> getAPIUsageByAppOverTime(DataFetchingEnvironment dataFetchingEnvironment, APIUsageFilter filter,
+            Environment environment) {
+        throw new DataFetchingException("Not supported.");
+    }
+
+    @Override
+    public List<IntMap> getTargetUsage(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
+            Environment environment) {
+        throw new DataFetchingException("Not supported.");
+    }
+
+    @Override
+    public List<IntMap> getTargetUsageOverTime(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
+            Environment environment) {
+        throw new DataFetchingException("Not supported.");
+    }
+
+    @Override
+    public List<ResourceUsage> getResourceUsage(DataFetchingEnvironment dataFetchingEnvironment,
+            ResourceUsageFilter filter, Environment environment) {
+        throw new DataFetchingException("Not supported.");
+    }
+
+    @Override
+    public List<IntMap> topSlowestAPIs(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
+            Environment environment) {
+        throw new DataFetchingException("Not supported.");
+    }
+
+    @Override
+    public List<Latency> getLatency(DataFetchingEnvironment dataFetchingEnvironment, LatencyFilter filter,
+            Environment environment) {
+        throw new DataFetchingException("Not supported.");
+    }
+
+    @Override
+    public List<CacheHits> getCacheHits(DataFetchingEnvironment dataFetchingEnvironment, LatencyFilter filter,
+            Environment environment) {
+        throw new DataFetchingException("Not supported.");
+    }
+
+    @Override
+    public List<IntMap> getTopPlatforms(DataFetchingEnvironment dataFetchingEnvironment, DeviceFilter filter,
+            Environment environment) {
+        throw new DataFetchingException("Not supported.");
+    }
+
+    @Override
+    public List<IntMap> getTopAgents(DataFetchingEnvironment dataFetchingEnvironment, DeviceFilter filter,
+            Environment environment) {
+        throw new DataFetchingException("Not supported.");
     }
 }

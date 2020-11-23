@@ -1,13 +1,7 @@
 package org.wso2.choreo.analytics.gql.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import graphql.ExecutionResult;
-import graphql.ExecutionResultImpl;
-import graphql.GraphQLError;
-import graphql.GraphqlErrorBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -42,6 +36,8 @@ public class JWTFilter extends OncePerRequestFilter {
             ServletException {
         try {
             getToken(request)
+                .map(userService::loadTokenFromCache)
+                .map(userService::checkValidity)
                 .map(userService::loadUserByToken)
                 .map(userDetails -> JWTPreAuthenticationToken
                     .builder()
@@ -51,14 +47,7 @@ public class JWTFilter extends OncePerRequestFilter {
                 .ifPresent(authentication -> SecurityContextHolder.getContext().setAuthentication(
                         (Authentication) authentication));
         } catch (BadTokenException e) {
-//            GraphQLError error = GraphqlErrorBuilder.newError().message(e.getMessage()).build();
-//            ExecutionResult result = ExecutionResultImpl.newExecutionResult().addError(error).build();
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-//            response.setStatus(HttpServletResponse.SC_OK);
-//            response.getWriter().write(objectMapper.writeValueAsString(result));
-//            response.flushBuffer();
-//            return;
+            log.error("Error occurred while validating token.", e);
         }
         filterChain.doFilter(request, response);
 
