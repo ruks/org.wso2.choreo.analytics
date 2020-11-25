@@ -1,9 +1,0 @@
-{
-    getAllAppAlertConfig {
-        apiName
-        apiVersion
-        appName
-        appOwner
-        thresholdRequestCount
-    }
-}

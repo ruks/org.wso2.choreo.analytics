@@ -1,7 +1,0 @@
-mutation {
-  UnSubscribeAlert(userId: "admin") {
-    userId
-    alertTypes
-    emails
-  }
-}

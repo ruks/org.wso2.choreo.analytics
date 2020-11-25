@@ -1,8 +1,0 @@
-{
-    getAllAPIAlertConfig {
-        apiName
-        apiVersion
-        thresholdResponseTime
-        thresholdBackendTime
-    }
-}
