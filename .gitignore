@@ -36,3 +36,4 @@ gradle/
 gradlew
 gradlew.bat
 settings.gradle
+org.wso2.choreo.analytics.api.iml
