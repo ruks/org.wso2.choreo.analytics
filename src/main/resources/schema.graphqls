@@ -56,8 +56,8 @@ type Query {
 type Mutation {
     addAPIAlertConfig(alertConfig: APIAlertConfigInput, environment: Environment!): APIAlertConfig
     addAppAlertConfig(alertConfig: AppAlertConfigInput, environment: Environment!): AppAlertConfig
-    SubscribeAlert(config: AlertSubscriptionInput, environment: Environment!): AlertSubscription
-    UnSubscribeAlert(environment: Environment!): AlertSubscription
+    subscribeAlert(config: AlertSubscriptionInput, environment: Environment!): AlertSubscription
+    unSubscribeAlert(environment: Environment!): AlertSubscription
 }
 
 # type

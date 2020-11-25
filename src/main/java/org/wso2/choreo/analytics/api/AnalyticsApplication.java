@@ -37,7 +37,6 @@ public class AnalyticsApplication {
 			System.setProperty("javax.net.ssl.trustStore", configuration.getSecurity().getTrustStore());
 			System.setProperty("javax.net.ssl.trustStorePassword", configuration.getSecurity().getTrustStorePass());
 		}
-
 	}
 	public static void main(String[] args) {
 		SpringApplication.run(AnalyticsApplication.class, args);
