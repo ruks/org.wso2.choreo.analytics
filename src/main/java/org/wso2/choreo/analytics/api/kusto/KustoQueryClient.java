@@ -88,7 +88,7 @@ public class KustoQueryClient {
             log.debug("executing kusto query: " + query);
             long startTime = System.currentTimeMillis();
             results = client.execute(dbName, query, clientRequestProperties);
-            log.info("Time take for the query {} is {}ms ", query, System.currentTimeMillis() - startTime);
+            log.debug("Time take for the query {} is {}ms ", query, System.currentTimeMillis() - startTime);
         } catch (DataServiceException | DataClientException e) {
             throw new QueryException("Error occurred while queries data.", e);
         }

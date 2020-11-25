@@ -2,7 +2,36 @@
 1. update required credentials of Azure and ADX in src/main/resources/application.yml
 2. build the project with `mvn clean install`
 3. run it with, `java -jar target/org.wso2.choreo.analytics.api-<project.version>>.jar --spring.config.location=target/application.yml`
-java -jar target/org.wso2.choreo.analytics.api-0.1-SNAPSHOT.jar --spring.config.location=/Users/rukshan/wso2/apim/coreo/analytics.api.config/application.yml
+4. run with env variables
+```
+    java -jar target/org.wso2.choreo.analytics.api-0.1-SNAPSHOT.jar \
+    --datasource.username="admin" \
+    --datasource.password="admin" \
+    --datasource.url="jdbc:sqlserver://localhost:1433;database=analytics" \
+    --kusto.clientid="34c4062d-3588-4426-a6e1-de1fc88fb8a3" \
+    --kusto.pass="9cf4fdb3-ec1f-406a-808e-acd33c9e390a" \
+    --kusto.auth="2b367c99-e2d6-4259-8cc7-d62a110d678f" \
+    --kusto.url="https://localhost:9099/query" \
+    --kusto.database="analytics" \
+    --security.jwks="https://localhost:9443/oauth2/jwks" \
+    --security.jwksIssuer="https://localhost:9443/oauth2/token"
+```    
+5. run with env variables and different logging level
+```
+    java -jar target/org.wso2.choreo.analytics.api-0.1-SNAPSHOT.jar \
+    --datasource.username="admin" \
+    --datasource.password="admin" \
+    --datasource.url="jdbc:sqlserver://localhost:1433;database=analytics" \
+    --kusto.clientid="34c4062d-3588-4426-a6e1-de1fc88fb8a3" \
+    --kusto.pass="9cf4fdb3-ec1f-406a-808e-acd33c9e390a" \
+    --kusto.auth="2b367c99-e2d6-4259-8cc7-d62a110d678f" \
+    --kusto.url="https://localhost:9099/query" \
+    --kusto.database="analytics" \
+    --security.jwks="https://localhost:9443/oauth2/jwks" \
+    --security.jwksIssuer="https://localhost:9443/oauth2/token" \
+    --logging.level.org.wso2.choreo.analytics.api=DEBUG
+```  
+
 
 # How to test
 1. API is served in url `http://localhost:8080/graphql`

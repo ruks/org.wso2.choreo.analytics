@@ -31,7 +31,7 @@ public class UserService implements UserDetailsService {
 
     @Cacheable("tokenCache")
     public JWTClaimsSet loadTokenFromCache(String token) {
-        log.info("cache miss");
+        log.debug("Token cache missed");
         JWTClaimsSet claimsSet;
         try {
             claimsSet = JWTValidator.get().validate(token);
