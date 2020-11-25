@@ -25,7 +25,7 @@ public class CustomMethodSecurityExpressionHandler extends DefaultMethodSecurity
             }
         }
 
-        MySecurityExpressionRoot root = new MySecurityExpressionRoot(authentication, environment);
+        CustomSecurityExpressionRoot root = new CustomSecurityExpressionRoot(authentication, environment);
         root.setPermissionEvaluator(getPermissionEvaluator());
         root.setTrustResolver(this.trustResolver);
         root.setRoleHierarchy(getRoleHierarchy());

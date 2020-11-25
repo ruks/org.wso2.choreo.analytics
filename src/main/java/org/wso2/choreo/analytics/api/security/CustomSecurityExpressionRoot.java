@@ -14,7 +14,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
 
-public class MySecurityExpressionRoot implements MethodSecurityExpressionOperations {
+public class CustomSecurityExpressionRoot implements MethodSecurityExpressionOperations {
     protected final Authentication authentication;
     protected final Environment environment;
     private AuthenticationTrustResolver trustResolver;
@@ -30,7 +30,7 @@ public class MySecurityExpressionRoot implements MethodSecurityExpressionOperati
     public final String delete = "delete";
     public final String admin = "administration";
 
-    public MySecurityExpressionRoot(Authentication authentication, Environment environment) {
+    public CustomSecurityExpressionRoot(Authentication authentication, Environment environment) {
         if (authentication == null) {
             throw new IllegalArgumentException("Authentication object cannot be null");
         }

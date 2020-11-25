@@ -55,14 +55,14 @@ public class KustoQueryClient {
 
     private void init() {
         Kusto kusto = ConfigHolder.getInstance().getConfiguration().getKusto();
-        String ClientID = kusto.getClientid();
-        String pass = kusto.getPass();
-        String auth = kusto.getAuth();
+        String applicationClientId = kusto.getApplicationClientId();
+        String applicationKey = kusto.getApplicationKey();
+        String authorityId = kusto.getAuthorityId();
         dbName = kusto.getDatabase();
-        String connectionUrl = kusto.getUrl();
+        String resourceUri = kusto.getResourceUri();
 
-        ConnectionStringBuilder csb =
-                ConnectionStringBuilder.createWithAadApplicationCredentials(connectionUrl, ClientID, pass, auth);
+        ConnectionStringBuilder csb = ConnectionStringBuilder
+                .createWithAadApplicationCredentials(resourceUri, applicationClientId, applicationKey, authorityId);
 
         try {
             client = new ClientImpl(csb);

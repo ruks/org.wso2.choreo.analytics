@@ -5,16 +5,13 @@ analytics:
     driver: com.microsoft.sqlserver.jdbc.SQLServerDriver
     url: ${datasource.url}
   kusto:
-    clientid: ${kusto.clientid}
-    pass: ${kusto.pass}
-    auth: ${kusto.auth}
-    url: ${kusto.url}
+    applicationClientId: ${kusto.applicationClientId}
+    applicationKey: ${kusto.applicationKey}
+    authorityId: ${kusto.authorityId}
+    resourceUri: ${kusto.resourceUri}
     database: ${kusto.database}
   security:
     #    trustStore: /Users/rukshan/wso2/apim/coreo/wso2is-5.10.0/repository/resources/security/client-truststore.jks
     #    trustStorePass: wso2carbon
     jwks: ${security.jwks}
     jwksIssuer: ${security.jwksIssuer}
-
-
-

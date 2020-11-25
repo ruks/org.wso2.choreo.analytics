@@ -20,42 +20,42 @@
 package org.wso2.choreo.analytics.api.config;
 
 public class Kusto {
-    private String clientid;
-    private String pass;
-    private String auth;
-    private String url;
+    private String applicationClientId;
+    private String applicationKey;
+    private String authorityId;
+    private String resourceUri;
     private String database;
 
-    public String getClientid() {
-        return clientid;
+    public String getApplicationClientId() {
+        return applicationClientId;
     }
 
-    public void setClientid(String clientid) {
-        this.clientid = clientid;
+    public void setApplicationClientId(String applicationClientId) {
+        this.applicationClientId = applicationClientId;
     }
 
-    public String getPass() {
-        return pass;
+    public String getApplicationKey() {
+        return applicationKey;
     }
 
-    public void setPass(String pass) {
-        this.pass = pass;
+    public void setApplicationKey(String applicationKey) {
+        this.applicationKey = applicationKey;
     }
 
-    public String getAuth() {
-        return auth;
+    public String getAuthorityId() {
+        return authorityId;
     }
 
-    public void setAuth(String auth) {
-        this.auth = auth;
+    public void setAuthorityId(String authorityId) {
+        this.authorityId = authorityId;
     }
 
-    public String getUrl() {
-        return url;
+    public String getResourceUri() {
+        return resourceUri;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setResourceUri(String resourceUri) {
+        this.resourceUri = resourceUri;
     }
 
     public String getDatabase() {
