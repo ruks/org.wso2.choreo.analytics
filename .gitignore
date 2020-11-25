@@ -36,13 +36,3 @@ gradle/
 gradlew
 gradlew.bat
 settings.gradle
-org.wso2.choreo.analytics.query.restapi/src/gen/
-org.wso2.choreo.analytics.gql/src/gen/
-org.wso2.choreo.analytics.api/org.wso2.choreo.analytics.api.iml
-org.wso2.choreo.analytics.query.restapi/org.wso2.choreo.analytics.query.restapi.iml
-org.wso2.choreo.analytics.iml
-org.wso2.choreo.analytics.webapp/org.wso2.choreo.analytics.webapp.iml
-org.wso2.choreo.analytics.ui/src/main/resources/portal/build
-org.wso2.choreo.analytics.ui/org.wso2.choreo.analytics.ui.iml
-org.wso2.choreo.analytics.ui/src/main/resources/portal/node_modules/
-org.wso2.choreo.analytics.gql/org.wso2.choreo.analytics.gql.iml
