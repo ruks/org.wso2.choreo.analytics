@@ -50,11 +50,11 @@ public class JWTValidator {
     private void init() {
         Security sec = ConfigHolder.getInstance().getConfiguration().getSecurity();
         this.jwtProcessor = new DefaultJWTProcessor<>();
-        JWKSource<SecurityContext> keySource = null;
+        JWKSource<SecurityContext> keySource;
         try {
             keySource = new RemoteJWKSet<>(new URL(sec.getJwks()));
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Malformed JWKs url.");
         }
         JWSAlgorithm expectedJWSAlg = JWSAlgorithm.RS256;
         JWSKeySelector<SecurityContext> keySelector = new JWSVerificationKeySelector<>(expectedJWSAlg, keySource);
@@ -74,7 +74,6 @@ public class JWTValidator {
 
     public JWTClaimsSet validate(String token) throws ParseException, JOSEException, BadJOSEException {
         SecurityContext ctx = null;
-        JWTClaimsSet claimsSet = this.jwtProcessor.process(token, ctx);
-        return claimsSet;
+        return this.jwtProcessor.process(token, ctx);
     }
 }

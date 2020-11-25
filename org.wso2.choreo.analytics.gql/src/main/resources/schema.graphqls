@@ -7,7 +7,6 @@ type Query {
 
     #util
     listAllAPI(provider: String, environment: Environment!): [API]
-    listVersion(apiName: String, environment: Environment!): [String]
     listApplications(owner: String, environment: Environment!): [Application]
     listProviders(environment: Environment!): [Provider]
 
@@ -18,10 +17,13 @@ type Query {
 
     #overview
     getTotalTraffic(filter: TimeFilter!, environment: Environment!): Int
-    getAvgErrorRate(filter: TimeFilter!, environment: Environment!): Int
+    getTotalProxyErrors(filter: TimeFilter!, environment: Environment!): Int
+    getTotalTargetErrors(filter: TimeFilter!, environment: Environment!): Int
     getOverallLatency(filter: TimeFilter!, environment: Environment!): Int
-    getApiAvailability(filter: TimeFilter!, environment: Environment!): ApiAvailability
-    getLatencySummary(filter: TimeFilter!, environment: Environment!): LatencySummary
+    getLatencySummary(filter: TimeFilter!, environment: Environment!): [LatencySummary]
+    getSuccessSummary(filter: TimeFilter!, environment: Environment!): [SuccessSummary]
+    getTargetErrorSummary(filter: TimeFilter!, environment: Environment!): [ErrorSummary]
+    getProxyErrorSummary(filter: TimeFilter!, environment: Environment!): [ErrorSummary]
 
     #error
     getTargetErrorsOverTime(filter: ErrorsOverTimeFilter!, environment: Environment!): [TargetErrorsOverTime]
@@ -52,10 +54,10 @@ type Query {
 }
 
 type Mutation {
-    addAPIAlertConfig(alertConfig: APIAlertConfigInput): APIAlertConfig
-    addAppAlertConfig(alertConfig: AppAlertConfigInput): AppAlertConfig
-    SubscribeAlert(config: AlertSubscriptionInput): AlertSubscription
-    UnSubscribeAlert(userId: String): AlertSubscription
+    addAPIAlertConfig(alertConfig: APIAlertConfigInput, environment: Environment!): APIAlertConfig
+    addAppAlertConfig(alertConfig: AppAlertConfigInput, environment: Environment!): AppAlertConfig
+    SubscribeAlert(config: AlertSubscriptionInput, environment: Environment!): AlertSubscription
+    UnSubscribeAlert(environment: Environment!): AlertSubscription
 }
 
 # type
@@ -126,10 +128,18 @@ type ApiAvailability {
 }
 
 type LatencySummary {
-    time: String
-    requestCount: Int
-    errorCount: Int
+    timeSpan: String
     latencyTime: Int
+}
+
+type SuccessSummary {
+    timeSpan: String
+    requestCount: Int
+}
+
+type ErrorSummary {
+    timeSpan: String
+    errorCount: Int
 }
 
 type API {

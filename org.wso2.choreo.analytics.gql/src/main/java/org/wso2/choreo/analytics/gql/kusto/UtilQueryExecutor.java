@@ -33,36 +33,36 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class UtilQueryExecutor extends KustoQueryClient {
+public class UtilQueryExecutor {
     private static final Logger log = LoggerFactory.getLogger(UtilQueryExecutor.class);
 
-    private final String QUERY_LIST_API = "analytics_poc_pipeline_request_test\n"
-            + "| where apiCreatorTenantDomain == \"${tenant}\" and customerId == \"${customerId}\"\n"
+    private final String QUERY_LIST_API = "analytics_request_summary\n"
+            + "| where apiCreatorTenantDomain == \"${tenant}\" and customerID == \"${customerId}\"\n"
             + "| summarize by apiId, apiName, apiVersion, apiCreator\n"
             + "| project-rename id = apiId, name = apiName, version = apiVersion, provider = apiCreator\n"
             + "| top 10 by name asc \n";
-    private final String QUERY_LIST_API_OF_PROVIDER = "analytics_poc_pipeline_request_test\n"
-            + "| where apiCreatorTenantDomain == \"${tenant}\" and customerId == \"${customerId}\" and apiCreator =="
+    private final String QUERY_LIST_API_OF_PROVIDER = "analytics_request_summary\n"
+            + "| where apiCreatorTenantDomain == \"${tenant}\" and customerID == \"${customerId}\" and apiCreator =="
             + " \"${apiCreator}\"\n"
             + "| summarize by apiId, apiName, apiVersion, apiCreator\n"
             + "| project-rename id = apiId, name = apiName, version = apiVersion, provider = apiCreator\n"
             + "| top 10 by name asc \n";
 
-    private final String QUERY_LIST_APPLICATIONS = "analytics_poc_pipeline_request_test\n"
-            + "| where apiCreatorTenantDomain == \"${tenant}\" and customerId == \"${customerId}\"\n"
+    private final String QUERY_LIST_APPLICATIONS = "analytics_request_summary\n"
+            + "| where apiCreatorTenantDomain == \"${tenant}\" and customerID == \"${customerId}\"\n"
             + "| summarize by applicationId, applicationName, applicationOwner\n"
             + "| project-rename id = applicationId, name = applicationName, owner = applicationOwner\n"
             + "| top 10 by name asc \n";
 
-    private final String QUERY_LIST_APPLICATIONS_BY_OWNER = "analytics_poc_pipeline_request_test\n"
-            + "| where apiCreatorTenantDomain == \"${tenant}\" and customerId == \"${customerId}\" and "
+    private final String QUERY_LIST_APPLICATIONS_BY_OWNER = "analytics_request_summary\n"
+            + "| where apiCreatorTenantDomain == \"${tenant}\" and customerID == \"${customerId}\" and "
             + "applicationOwner == \"${owner}\"\n"
             + "| summarize by applicationId, applicationName, applicationOwner\n"
             + "| project-rename id = applicationId, name = applicationName, owner = applicationOwner\n"
             + "| top 10 by name asc \n";
 
-    private final String QUERY_LIST_PROVIDERS = "analytics_poc_pipeline_request_test\n"
-            + "| where apiCreatorTenantDomain == \"${tenant}\" and customerId == \"${customerId}\"\n"
+    private final String QUERY_LIST_PROVIDERS = "analytics_request_summary\n"
+            + "| where apiCreatorTenantDomain == \"${tenant}\" and customerID == \"${customerId}\"\n"
             + "| distinct apiCreator\n"
             + "| project-rename name = apiCreator\n"
             + "| top 10 by name asc ";
@@ -74,8 +74,9 @@ public class UtilQueryExecutor extends KustoQueryClient {
             }
         };
         String query = QueryProcessor.applyUserDetails(QUERY_LIST_API, user, parasMap);
-        List<Map<String, Object>> map = execute(query);
-        return convertTo(map, new TypeReference<>(){});
+
+        List<Map<String, Object>> map = KustoQueryClient.getInstance().execute(query);
+        return Utils.convertTo(map, new TypeReference<>(){});
     }
 
     public List<API> getAllApis(JWTUserDetails user, String environment, String provider)
@@ -87,8 +88,8 @@ public class UtilQueryExecutor extends KustoQueryClient {
             }
         };
         String query = QueryProcessor.applyUserDetails(QUERY_LIST_API_OF_PROVIDER, user, parasMap);
-        List<Map<String, Object>> map = execute(query);
-        return convertTo(map, new TypeReference<>(){});
+        List<Map<String, Object>> map = KustoQueryClient.getInstance().execute(query);
+        return Utils.convertTo(map, new TypeReference<>(){});
     }
 
     public List<Application> getAllApplications(JWTUserDetails user, String environment)
@@ -99,8 +100,8 @@ public class UtilQueryExecutor extends KustoQueryClient {
             }
         };
         String query = QueryProcessor.applyUserDetails(QUERY_LIST_APPLICATIONS, user, parasMap);
-        List<Map<String, Object>> map = execute(query);
-        return convertTo(map, new TypeReference<>(){});
+        List<Map<String, Object>> map = KustoQueryClient.getInstance().execute(query);
+        return Utils.convertTo(map, new TypeReference<>(){});
     }
 
     public List<Application> getAllApplications(JWTUserDetails user, String environment, String owner)
@@ -112,8 +113,8 @@ public class UtilQueryExecutor extends KustoQueryClient {
             }
         };
         String query = QueryProcessor.applyUserDetails(QUERY_LIST_APPLICATIONS_BY_OWNER, user, parasMap);
-        List<Map<String, Object>> map = execute(query);
-        return convertTo(map, new TypeReference<>(){});
+        List<Map<String, Object>> map = KustoQueryClient.getInstance().execute(query);
+        return Utils.convertTo(map, new TypeReference<>(){});
     }
 
     public List<Provider> getProviders(JWTUserDetails user, String environment)
@@ -124,7 +125,7 @@ public class UtilQueryExecutor extends KustoQueryClient {
             }
         };
         String query = QueryProcessor.applyUserDetails(QUERY_LIST_PROVIDERS, user, parasMap);
-        List<Map<String, Object>> map = execute(query);
-        return convertTo(map, new TypeReference<>(){});
+        List<Map<String, Object>> map = KustoQueryClient.getInstance().execute(query);
+        return Utils.convertTo(map, new TypeReference<>(){});
     }
 }

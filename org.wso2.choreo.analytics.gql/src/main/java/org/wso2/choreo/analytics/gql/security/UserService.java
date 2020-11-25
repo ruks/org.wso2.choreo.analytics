@@ -25,7 +25,7 @@ public class UserService implements UserDetailsService {
 
     public JWTUserDetails loadUserByToken(JWTClaimsSet claimsSet) {
         JWTUserDetails details =
-                new JWTUserDetails(claimsSet.getSubject(), "foo.com", "prod", "Laposte", Collections.EMPTY_LIST);
+                new JWTUserDetails(claimsSet.getSubject(), "carbon.super", "prod", "wso2", Collections.EMPTY_LIST);
         return details;
     }
 

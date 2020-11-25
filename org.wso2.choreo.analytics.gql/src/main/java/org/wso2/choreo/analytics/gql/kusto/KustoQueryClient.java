@@ -19,8 +19,6 @@
 
 package org.wso2.choreo.analytics.gql.kusto;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.kusto.data.ClientImpl;
 import com.microsoft.azure.kusto.data.ClientRequestProperties;
 import com.microsoft.azure.kusto.data.ConnectionStringBuilder;
@@ -32,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.choreo.analytics.gql.config.ConfigHolder;
 import org.wso2.choreo.analytics.gql.config.Kusto;
-import org.wso2.choreo.analytics.gql.impl.DataFetchingException;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -45,7 +42,16 @@ public class KustoQueryClient {
     private ClientImpl client;
     private String dbName;
     private ClientRequestProperties clientRequestProperties;
-    private final ObjectMapper mapper = new ObjectMapper();
+
+    private static KustoQueryClient inst;
+
+    public static KustoQueryClient getInstance() {
+        if(inst == null) {
+            inst = new KustoQueryClient();
+            inst.init();
+        }
+        return inst;
+    }
 
     private void init() {
         Kusto kusto = ConfigHolder.getInstance().getConfiguration().getKusto();
@@ -61,7 +67,7 @@ public class KustoQueryClient {
         try {
             client = new ClientImpl(csb);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            log.error("Error initializing kusto client", e);
         }
         clientRequestProperties = new ClientRequestProperties();
         clientRequestProperties.setOption("ClientRequestId", "ohadId");
@@ -80,7 +86,9 @@ public class KustoQueryClient {
         KustoOperationResult results;
         try {
             log.debug("executing kusto query: " + query);
+            long startTime = System.currentTimeMillis();
             results = client.execute(dbName, query, clientRequestProperties);
+            log.info("Time take for the query {} is {}ms ", query, System.currentTimeMillis() - startTime);
         } catch (DataServiceException | DataClientException e) {
             throw new QueryException("Error occurred while queries data.", e);
         }
@@ -97,13 +105,4 @@ public class KustoQueryClient {
         return list;
     }
 
-    final <T> T convertTo(Object o, TypeReference<T> typeReference) throws IllegalArgumentException {
-        try {
-                T converted = mapper.convertValue(o, typeReference);
-            return converted;
-        } catch (IllegalArgumentException e) {
-            log.error("Error occurred while formatting requested data.", e);
-            throw new DataFetchingException("Error occurred while formatting requested data.");
-        }
-    }
 }

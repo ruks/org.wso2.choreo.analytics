@@ -20,6 +20,8 @@
 package org.wso2.choreo.analytics.gql.impl;
 
 import graphql.schema.DataFetchingEnvironment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.wso2.choreo.analytics.gql.APIAlertConfig;
@@ -29,12 +31,15 @@ import org.wso2.choreo.analytics.gql.AlertSubscriptionInput;
 import org.wso2.choreo.analytics.gql.AppAlertConfig;
 import org.wso2.choreo.analytics.gql.AppAlertConfigInput;
 import org.wso2.choreo.analytics.gql.DataFetchersDelegateMutation;
+import org.wso2.choreo.analytics.gql.Environment;
 import org.wso2.choreo.analytics.gql.alert.AlertDAO;
+import org.wso2.choreo.analytics.gql.alert.AlertDAOException;
 import org.wso2.choreo.analytics.gql.security.JWTUserDetails;
 import org.wso2.choreo.analytics.gql.security.UserService;
 
 @Component
 public class DataFetchersDelegateMutationImpl implements DataFetchersDelegateMutation {
+    private static final Logger log = LoggerFactory.getLogger(DataFetchersDelegateMutationImpl.class);
     private final UserService userService;
 
     public DataFetchersDelegateMutationImpl(UserService userService) {
@@ -42,28 +47,53 @@ public class DataFetchersDelegateMutationImpl implements DataFetchersDelegateMut
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public APIAlertConfig addAPIAlertConfig(DataFetchingEnvironment dataFetchingEnvironment,
-            APIAlertConfigInput alertConfig) {
-        return null;
+            APIAlertConfigInput alertConfig, Environment environment) {
+        JWTUserDetails user = userService.getCurrentUser();
+        try {
+            return AlertDAO.getInstance().updateAPICreatorAlertConfig(user, alertConfig, environment.getName());
+        } catch (AlertDAOException e) {
+            log.error("Error occurred while adding API alert configurations.", e);
+            throw new DataFetchingException("Error occurred while adding API alert configurations.");
+        }
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public AppAlertConfig addAppAlertConfig(DataFetchingEnvironment dataFetchingEnvironment,
-            AppAlertConfigInput alertConfig) {
-        return null;
+            AppAlertConfigInput alertConfig, Environment environment) {
+        JWTUserDetails user = userService.getCurrentUser();
+        try {
+            return AlertDAO.getInstance().updateSubscriberAlertConfig(user, alertConfig, environment.getName());
+        } catch (AlertDAOException e) {
+            log.error("Error occurred while adding application alert configurations.", e);
+            throw new DataFetchingException("Error occurred while adding application alert configurations.");
+        }
     }
 
     @Override
     @PreAuthorize("isAuthenticated()")
     public AlertSubscription subscribeAlert(DataFetchingEnvironment dataFetchingEnvironment,
-            AlertSubscriptionInput config) {
+            AlertSubscriptionInput config, Environment environment) {
         JWTUserDetails user = userService.getCurrentUser();
-        AlertDAO dao = AlertDAO.getInstance();
-        return dao.subscribeAlert(user, config);
+        try {
+            return AlertDAO.getInstance().subscribeAlert(user, config, environment.getName());
+        } catch (AlertDAOException e) {
+            log.error("Error while subscribe to alert.", e);
+            throw new DataFetchingException("Error while subscribe to alert.");
+        }
     }
 
     @Override
-    public AlertSubscription unSubscribeAlert(DataFetchingEnvironment dataFetchingEnvironment, String userId) {
-        return null;
+    public AlertSubscription unSubscribeAlert(DataFetchingEnvironment dataFetchingEnvironment,
+            Environment environment) {
+        JWTUserDetails user = userService.getCurrentUser();
+        try {
+            return AlertDAO.getInstance().unSubscribeAlert(user, environment.getName());
+        } catch (AlertDAOException e) {
+            log.error("Error while un-subscribing alert.", e);
+            throw new DataFetchingException("Error while un-subscribing alert.");
+        }
     }
 }

@@ -35,6 +35,7 @@ import org.wso2.choreo.analytics.gql.CacheHits;
 import org.wso2.choreo.analytics.gql.DataFetchersDelegateQuery;
 import org.wso2.choreo.analytics.gql.DeviceFilter;
 import org.wso2.choreo.analytics.gql.Environment;
+import org.wso2.choreo.analytics.gql.ErrorSummary;
 import org.wso2.choreo.analytics.gql.ErrorsByCategory;
 import org.wso2.choreo.analytics.gql.ErrorsByCategoryFilter;
 import org.wso2.choreo.analytics.gql.ErrorsMap;
@@ -47,9 +48,12 @@ import org.wso2.choreo.analytics.gql.LatencySummary;
 import org.wso2.choreo.analytics.gql.Provider;
 import org.wso2.choreo.analytics.gql.ResourceUsage;
 import org.wso2.choreo.analytics.gql.ResourceUsageFilter;
+import org.wso2.choreo.analytics.gql.SuccessSummary;
 import org.wso2.choreo.analytics.gql.TargetErrorsOverTime;
 import org.wso2.choreo.analytics.gql.TimeFilter;
 import org.wso2.choreo.analytics.gql.alert.AlertDAO;
+import org.wso2.choreo.analytics.gql.alert.AlertDAOException;
+import org.wso2.choreo.analytics.gql.kusto.OverviewQueryExecutor;
 import org.wso2.choreo.analytics.gql.kusto.QueryException;
 import org.wso2.choreo.analytics.gql.kusto.UtilQueryExecutor;
 import org.wso2.choreo.analytics.gql.security.JWTUserDetails;
@@ -62,10 +66,12 @@ public class DataFetchersDelegateQueryImpl implements DataFetchersDelegateQuery 
     private static final Logger log = LoggerFactory.getLogger(DataFetchersDelegateQueryImpl.class);
     private final UserService userService;
     private UtilQueryExecutor utilQueryExecutor;
+    private OverviewQueryExecutor overviewQueryExecutor;
 
-    public DataFetchersDelegateQueryImpl(UserService userService, UtilQueryExecutor utilQueryExecutor) {
+    public DataFetchersDelegateQueryImpl(UserService userService, UtilQueryExecutor utilQueryExecutor, OverviewQueryExecutor overviewQueryExecutor) {
         this.userService = userService;
         this.utilQueryExecutor = utilQueryExecutor;
+        this.overviewQueryExecutor = overviewQueryExecutor;
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -85,12 +91,6 @@ public class DataFetchersDelegateQueryImpl implements DataFetchersDelegateQuery 
             log.error("Error while getting APIs.", e);
             throw new DataFetchingException("Error while getting APIs.");
         }
-    }
-
-    @Override
-    public List<String> listVersion(DataFetchingEnvironment dataFetchingEnvironment, String apiName,
-            Environment environment) {
-        throw new DataFetchingException("Not supported.");
     }
 
     @Override
@@ -125,15 +125,29 @@ public class DataFetchersDelegateQueryImpl implements DataFetchersDelegateQuery 
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public List<APIAlertConfig> getAllAPIAlertConfig(DataFetchingEnvironment dataFetchingEnvironment,
             Environment environment) {
-        throw new DataFetchingException("Not supported.");
+        JWTUserDetails user = userService.getCurrentUser();
+        try {
+            return AlertDAO.getInstance().getAllAPICreatorAlertConfig(user, environment.getName());
+        } catch (AlertDAOException e) {
+            log.error("Error while getting API alert configs.", e);
+            throw new DataFetchingException("Error while getting API alert configs.");
+        }
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public List<AppAlertConfig> getAllAppAlertConfig(DataFetchingEnvironment dataFetchingEnvironment,
             Environment environment) {
-        throw new DataFetchingException("Not supported.");
+        JWTUserDetails user = userService.getCurrentUser();
+        try {
+            return AlertDAO.getInstance().getAllSubscriberAlertConfig(user, environment.getName());
+        } catch (AlertDAOException e) {
+            log.error("Error while getting application alert configs.", e);
+            throw new DataFetchingException("Error while getting application alert configs.");
+        }
     }
 
     @Override
@@ -141,48 +155,127 @@ public class DataFetchersDelegateQueryImpl implements DataFetchersDelegateQuery 
     public AlertSubscription getAlertSubscription(DataFetchingEnvironment dataFetchingEnvironment,
             Environment environment) {
         JWTUserDetails user = userService.getCurrentUser();
-        AlertDAO dao = AlertDAO.getInstance();
-        return dao.getAlertSubscription(user);
+        try {
+            return AlertDAO.getInstance().getAlertSubscription(user, environment.getName());
+        } catch (AlertDAOException e) {
+            log.error("Error while getting alert subscriptions.", e);
+            throw new DataFetchingException("Error while getting alert subscriptions");
+        }
     }
 
     @Override
     @PreAuthorize("isAuthenticated()")
     public Integer getTotalTraffic(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
             Environment environment) {
-        throw new DataFetchingException("Not supported.");
+        JWTUserDetails user = userService.getCurrentUser();
+        try {
+            return overviewQueryExecutor.getTotalTraffic(user, environment.getName(), filter);
+        } catch (QueryException e) {
+            log.error("Error while getting total traffic.", e);
+            throw new DataFetchingException("Error while getting total traffic.");
+        }
     }
 
     @Override
-    public Integer getAvgErrorRate(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
+    @PreAuthorize("isAuthenticated()")
+    public Integer getTotalProxyErrors(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
             Environment environment) {
-        throw new DataFetchingException("Not supported.");
+        JWTUserDetails user = userService.getCurrentUser();
+        try {
+            return overviewQueryExecutor.getTotalProxyError(user, environment.getName(), filter);
+        } catch (QueryException e) {
+            log.error("Error while getting total proxy errors.", e);
+            throw new DataFetchingException("Error while getting total proxy errors.");
+        }
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
+    public Integer getTotalTargetErrors(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
+            Environment environment) {
+        JWTUserDetails user = userService.getCurrentUser();
+        try {
+            return overviewQueryExecutor.getTotalTargetError(user, environment.getName(), filter);
+        } catch (QueryException e) {
+            log.error("Error while getting total target errors.", e);
+            throw new DataFetchingException("Error while getting total target errors.");
+        }
+    }
+
+    @Override
+    @PreAuthorize("isAuthenticated()")
     public Integer getOverallLatency(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
             Environment environment) {
-        throw new DataFetchingException("Not supported.");
+        JWTUserDetails user = userService.getCurrentUser();
+        try {
+            return overviewQueryExecutor.getMaxLatency(user, environment.getName(), filter);
+        } catch (QueryException e) {
+            log.error("Error while getting max latency.", e);
+            throw new DataFetchingException("Error while getting max latency.");
+        }
     }
 
     @Override
-    public ApiAvailability getApiAvailability(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
+    @PreAuthorize("isAuthenticated()")
+    public List<LatencySummary> getLatencySummary(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
             Environment environment) {
-        throw new DataFetchingException("Not supported.");
+        JWTUserDetails user = userService.getCurrentUser();
+        try {
+            return overviewQueryExecutor.getLatencySummary(user, environment.getName(), filter);
+        } catch (QueryException e) {
+            log.error("Error while getting latency summary.", e);
+            throw new DataFetchingException("Error while getting latency summary.");
+        }
     }
 
     @Override
-    public LatencySummary getLatencySummary(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
+    @PreAuthorize("isAuthenticated()")
+    public List<SuccessSummary> getSuccessSummary(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
             Environment environment) {
-        throw new DataFetchingException("Not supported.");
+        JWTUserDetails user = userService.getCurrentUser();
+        try {
+            return overviewQueryExecutor.getSuccessSummary(user, environment.getName(), filter);
+        } catch (QueryException e) {
+            log.error("Error while getting success summary.", e);
+            throw new DataFetchingException("Error while getting success summary.");
+        }
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
+    public List<ErrorSummary> getTargetErrorSummary(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
+            Environment environment) {
+        JWTUserDetails user = userService.getCurrentUser();
+        try {
+            return overviewQueryExecutor.getTargetErrorSummary(user, environment.getName(), filter);
+        } catch (QueryException e) {
+            log.error("Error while getting target error summary.", e);
+            throw new DataFetchingException("Error while getting target error summary.");
+        }
+    }
+
+    @Override
+    @PreAuthorize("isAuthenticated()")
+    public List<ErrorSummary> getProxyErrorSummary(DataFetchingEnvironment dataFetchingEnvironment, TimeFilter filter,
+            Environment environment) {
+        JWTUserDetails user = userService.getCurrentUser();
+        try {
+            return overviewQueryExecutor.getProxyErrorSummary(user, environment.getName(), filter);
+        } catch (QueryException e) {
+            log.error("Error while getting proxy error summary.", e);
+            throw new DataFetchingException("Error while getting proxy error summary.");
+        }
+    }
+
+    @Override
+    @PreAuthorize("isAuthenticated()")
     public List<TargetErrorsOverTime> getTargetErrorsOverTime(DataFetchingEnvironment dataFetchingEnvironment,
             ErrorsOverTimeFilter filter, Environment environment) {
         throw new DataFetchingException("Not supported.");
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public List<GatewayErrorsOverTime> getGatewayErrorsOverTime(DataFetchingEnvironment dataFetchingEnvironment,
             ErrorsOverTimeFilter filter, Environment environment) {
         throw new DataFetchingException("Not supported.");
