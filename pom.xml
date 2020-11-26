@@ -140,7 +140,7 @@
         <dependency>
             <groupId>com.graphql-java-generator</groupId>
             <artifactId>graphql-java-runtime</artifactId>
-            <version>local-SNAPSHOT</version>
+            <version>1.11</version>
         </dependency>
         <dependency>
             <groupId>com.nimbusds</groupId>
