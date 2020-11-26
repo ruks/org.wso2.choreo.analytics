@@ -1,3 +1,4 @@
+test1
 # How to run
 1. update required credentials of Azure and ADX in src/main/resources/application.yml
 2. build the project with `mvn clean install`
