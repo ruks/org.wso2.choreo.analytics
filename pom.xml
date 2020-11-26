@@ -18,7 +18,7 @@
             <plugin>
                 <groupId>com.graphql-java-generator</groupId>
                 <artifactId>graphql-maven-plugin</artifactId>
-                <version>local-SNAPSHOT</version>
+                <version>1.11</version>
                 <executions>
                     <execution>
                         <goals>
