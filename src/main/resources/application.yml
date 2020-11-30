@@ -1,17 +1,18 @@
 analytics:
   datasource:
-    username: ${datasource.username}
-    password: ${datasource.password}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
     driver: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: ${datasource.url}
+    url: ${DATASOURCE_URL}
   kusto:
-    applicationClientId: ${kusto.applicationClientId}
-    applicationKey: ${kusto.applicationKey}
-    authorityId: ${kusto.authorityId}
-    resourceUri: ${kusto.resourceUri}
-    database: ${kusto.database}
+    applicationClientId: ${KUSTO_APPLICATION_CLIENT_ID}
+    applicationKey: ${KUSTO_APPLICATION_KEY}
+    authorityId: ${KUSTO_AUTHORITY_ID}
+    resourceUri: ${KUSTO_RESOURCE_URI}
+    database: ${KUSTO_DATABASE}
   security:
     #    trustStore: /Users/rukshan/wso2/apim/coreo/wso2is-5.10.0/repository/resources/security/client-truststore.jks
     #    trustStorePass: wso2carbon
-    jwks: ${security.jwks}
-    jwksIssuer: ${security.jwksIssuer}
+    jwks: ${SECURITY_JWKS}
+    jwksIssuer: ${SECURITY_JWKS_ISSUER}
+
