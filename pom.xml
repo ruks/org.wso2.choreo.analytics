@@ -74,20 +74,13 @@
                             <mainClass>
                                 org.wso2.choreo.analytics.api.AnalyticsApplication
                             </mainClass>
+
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <finalName>analytics.api.app</finalName>
-                </configuration>
-            </plugin>
         </plugins>
-
+        <finalName>analytics.api</finalName>
     </build>
 
     <dependencies>
